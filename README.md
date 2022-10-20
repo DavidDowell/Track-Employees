@@ -7,7 +7,7 @@ Create a content management system to allow a business owner to interact with st
 ## How It Works
 
 * Inquirer is installed and used for prompts in the command line.
-* Application starts when the user types "node index.js" into the command line.
+* Application starts when the user types either "node index.js" or "npm start" into the command line.
 * Options show up that the user can choose including: view all departments, view all roles, view all employees, add a role, add an employee, and update.
 * View all deparments brings up a table with the department names and ids.
 * View all rolls provides information on each role including job title, role id, department, and salary for that role.
@@ -18,4 +18,8 @@ Create a content management system to allow a business owner to interact with st
 
 ## Walkthrough
 
+https://www.youtube.com/watch?v=KoO7xXScgOM
+
 ## GitHub Repository
+
+https://github.com/DavidDowell/Track-Employees
