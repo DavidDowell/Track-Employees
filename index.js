@@ -3,6 +3,22 @@ const mysql = require('mysql2');
 const db = require('./db/connection');
 // require('console.table');
 
+console.log(`%c
+        
+ /$$$$$$$$                         /$$                                                  
+ | $$_____/                        | $$                                                  
+ | $$       /$$$$$$/$$$$   /$$$$$$ | $$  /$$$$$$  /$$   /$$  /$$$$$$   /$$$$$$   /$$$$$$$
+ | $$$$$   | $$_  $$_  $$ /$$__  $$| $$ /$$__  $$| $$  | $$ /$$__  $$ /$$__  $$ /$$_____/
+ | $$__/   | $$ \ $$ \ $$| $$  \ $$| $$| $$  \ $$| $$  | $$| $$$$$$$$| $$$$$$$$|  $$$$$$ 
+ | $$      | $$ | $$ | $$| $$  | $$| $$| $$  | $$| $$  | $$| $$_____/| $$_____/ \____  $$
+ | $$$$$$$$| $$ | $$ | $$| $$$$$$$/| $$|  $$$$$$/|  $$$$$$$|  $$$$$$$|  $$$$$$$ /$$$$$$$/
+ |________/|__/ |__/ |__/| $$____/ |__/ \______/  \____  $$ \_______/ \_______/|_______/ 
+                         | $$                     /$$  | $$                              
+                         | $$                    |  $$$$$$/                              
+                         |__/                     \______/                               
+ `, "font-family:monospace"                                
+);
+
 const mainMenu = async () => {
     const promptValue = await inquirer.prompt([
         {
@@ -43,14 +59,6 @@ const mainMenu = async () => {
                     value: 'UPDATE_EMPLOYEE_MANAGER',
                 },
                 {
-                    name: 'View employees by manager',
-                    value: 'VIEW_EMPLOYEE_BY_MANAGER'
-                },
-                {
-                    name: "View employees by department",
-                    value: "VIEW_EMPLOYEE_BY_DEPARTMENT"
-                },
-                {
                     name: 'EXIT',
                     value: "EXIT"
                 }
@@ -82,12 +90,6 @@ switch (promptValue.choice) {
         break;
     case "UPDATE_EMPLOYEE_MANAGER":
         updateEmployeeManager();
-        break;
-    case "VIEW_EMPLOYEE_BY_MANAGER":
-        viewEmployeeByManager();
-        break;
-    case "VIEW_EMPLOYEE_BY_DEPARTMENT":
-        viewEmployeeByDepartment();
         break;
     case "EXIT":
         process.exit();
@@ -134,6 +136,14 @@ const viewRoles = async () => {
 };
 
 const addEmployee = async () => {
+    console.log('------REFERENCE--------')
+    const [roleData] = await db.query (`SELECT role.id,
+    role.title AS job_title,
+    department.name AS department,
+    role.salary FROM role
+    LEFT JOIN department ON role.department_id = department.id
+    `);
+    console.table(roleData);
     const promptValue = await inquirer.prompt ([
         {
             type: 'text',
@@ -146,23 +156,30 @@ const addEmployee = async () => {
             message: "What is the employee's last name?"
         },
         {
-            type: 'text',
+            
+            type: 'int',
             name: 'role',
-            message: 'What is their role?'
+            message: 'Using the table above choose a role id number for this employee.'
         },
-        {
-            type: 'text',
-            name: 'manager',
-            message: "Who is their manager?"
-        }
     ]);
+
+    const [employeeData] = await db.query (`SELECT * FROM employee`);
+    console.table(employeeData);
+
+    const promptValue2 = await inquirer.prompt ([
+        {
+            type: 'int',
+            name: 'manager',
+            message: "Choose their manager using the corresponding id number in the table above."
+        }
+    ])
 
     const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
     const params = [
         promptValue.first_name,
         promptValue.last_name,
         promptValue.role,
-        promptValue.manager
+        promptValue2.manager
     ];
 
     db.query(sql, params, (err, result) => {
@@ -188,9 +205,9 @@ const addRole = async () => {
             message: 'What is the salary for this role?'
         },
         {
-            type: 'text',
+            type: 'int',
             name: 'department',
-            message: 'What is the department this role falls under?'
+            message: 'What is the department this role falls under? (choose department by id number)'
         }
     ]);
 
@@ -246,7 +263,7 @@ const updateRole = async () => {
         }
     ]);
 
-    const [roleData] = await db.quiery(`SELECT * FROM role`);
+    const [roleData] = await db.query(`SELECT * FROM role`);
     console.table(roleData);
     
     const promptValue2 = await inquirer.prompt([
@@ -274,16 +291,38 @@ const updateRole = async () => {
 };
 
 const updateEmployeeManager = async () => {
+    const [employeeData] = await db.query(`SELECT * FROM employee`);
+    console.table(employeeData);
 
-}
+  const promptValue = await inquirer.prompt([
+    {
+      type: "text",
+      name: "employee_id",
+      message:
+        "Looking at the table above, please input the employee's id number you wish to update their manager.",
+    },
+    {
+      type: "int",
+      name: "manager_id",
+      message:
+        "Input the manager's id number you would like to assign to this employee",
+    },
+  ]);
 
-const viewEmployeeByManager = async () => {
+  const sql = `UPDATE employee SET manager_id = ? WHERE id = ?`;
 
-}
+  const params = [promptValue.manager_id, promptValue.employee_id];
 
-const viewEmployeeByDepartment = async () => {
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+  });
+  console.log("Employee's manager was updated!");
+  mainMenu();
+};
 
-}
 
 
 mainMenu();
