@@ -224,7 +224,7 @@ const addDepartment = async () => {
     const sql = `INSERT INTO department (name) VALUES (?)`;
     const params = promptValue.name;
 
-    db.query(sql, params, (err, result) {
+    db.query(sql, params, (err, result) => {
         if (err) {
             console.log(err);
             return;
